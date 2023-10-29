@@ -122,7 +122,10 @@ def get_prices():
         df = signin_rs(goods["url"], goods["user_id"], goods["password"])
         df_show = prettify_df(df)
         break
-    return df_show.to_markdown(index=False)
+    text = """今日のおこづかいはこちら
+
+"""
+    return text + df_show.to_markdown(index=False)
 
 
 if __name__ == "__main__":
