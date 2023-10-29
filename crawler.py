@@ -45,7 +45,7 @@ def webdriver_start(mode="h") -> WebDriver:
         )
 
 
-def signin_rs(url, user_id, password):
+def signin_rs(url: str, user_id: str, password: str) -> pandas.DataFrame:
     # driver = webdriver_start(mode="n")
     driver = webdriver_start()
 
@@ -83,20 +83,35 @@ def signin_rs(url, user_id, password):
         by=By.XPATH,
         value=f'//table[@id="poss-tbl-sp"]',
     )
-    df_fund = pandas.read_html(table_element.get_attribute("outerHTML"))[0]
+    return pandas.read_html(table_element.get_attribute("outerHTML"))[0]
+
+
+def prettify_df(df: pandas.DataFrame) -> pandas.DataFrame:
     values = [
         element.split("\t")[0]
-        for element in df_fund.loc[:, "時価評価額 評価損益"].to_list()
+        for element in df.loc[:, "時価評価額 評価損益"].to_list()
         if element == element
     ]
     variations = [
         element.split("\t")[-1]
-        for element in df_fund.loc[:, "時価評価額 評価損益"].to_list()
+        for element in df.loc[:, "時価評価額 評価損益"].to_list()
         if element == element
     ]
-    df_show = df_fund.loc[list(range(0, 16, 3)), ["ファンド"]]
+    df_show = df.loc[list(range(0, 16, 3)), ["ファンド"]]
     df_show["時価評価額"] = values
     df_show["評価損益"] = variations
+    total_value = sum(
+        [int(_v.replace("円", "").replace(",", "").strip()) for _v in values]
+    )
+    total_pl = sum(
+        [int(_v.replace("円", "").replace(",", "").strip()) for _v in variations]
+    )
+    df_show.loc["total"] = {
+        "ファンド": "合計",
+        "時価評価額": f"{total_value:,}円",
+        "評価損益": f"{total_pl:+,}円",
+    }
+    df_show.to_pickle("df.zip")
     return df_show
 
 
@@ -104,9 +119,10 @@ def get_prices():
     config = read_config("config.yaml")
     for key in config.keys():
         goods = config[key]
-        text = signin_rs(goods["url"], goods["user_id"], goods["password"])
+        df = signin_rs(goods["url"], goods["user_id"], goods["password"])
+        df_show = prettify_df(df)
         break
-    return text.to_markdown(index=False)
+    return df_show.to_markdown(index=False)
 
 
 if __name__ == "__main__":
