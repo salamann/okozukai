@@ -1,4 +1,5 @@
 from time import sleep
+import io
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -84,7 +85,7 @@ def signin_rs(url: str, user_id: str, password: str) -> pandas.DataFrame:
         by=By.XPATH,
         value=f'//table[@id="poss-tbl-sp"]',
     )
-    return pandas.read_html(table_element.get_attribute("outerHTML"))[0]
+    return pandas.read_html(io.StringIO(table_element.get_attribute("outerHTML")))[0]
 
 
 def prettify_df(df: pandas.DataFrame) -> pandas.DataFrame:
