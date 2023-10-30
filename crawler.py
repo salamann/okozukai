@@ -10,6 +10,7 @@ from selenium.common.exceptions import (
 )
 import pandas
 from webdriver_manager.chrome import ChromeDriverManager
+import plotly.figure_factory as ff
 
 from utils import read_config
 
@@ -111,8 +112,16 @@ def prettify_df(df: pandas.DataFrame) -> pandas.DataFrame:
         "時価評価額": f"{total_value:,}円",
         "評価損益": f"{total_pl:+,}円",
     }
+
+    # shrink fund name
+    df_show["ファンド"] = [_.split("(")[0].replace("・ファンド", "") for _ in df_show["ファンド"]]
     df_show.to_pickle("df.zip")
     return df_show
+
+
+def create_table_image(df: pandas.DataFrame) -> None:
+    fig = ff.create_table(df)
+    fig.write_image("table_plotly.png", scale=2)
 
 
 def get_prices():
@@ -121,6 +130,7 @@ def get_prices():
         goods = config[key]
         df = signin_rs(goods["url"], goods["user_id"], goods["password"])
         df_show = prettify_df(df)
+        create_table_image(df_show)
         break
     text = """今日のおこづかいはこちら
 

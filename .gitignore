@@ -3,3 +3,5 @@ config.yaml
 line.yaml
 __pycache__
 df.zip
+table_plotly.png
+server.yaml
