@@ -47,6 +47,15 @@ def webdriver_start(mode="h") -> WebDriver:
         )
 
 
+def get_todays_news():
+    driver = webdriver_start()
+    driver.get("https://www.sc.mufg.jp/market/today_market/index.html")
+    sleep(3)
+    return driver.find_element(By.XPATH, value="//p[@class='text']").text.replace(
+        " ", ""
+    )
+
+
 def signin_rs(url: str, user_id: str, password: str) -> pandas.DataFrame:
     # driver = webdriver_start(mode="n")
     driver = webdriver_start()
@@ -140,4 +149,4 @@ def get_prices():
 
 
 if __name__ == "__main__":
-    pass
+    get_todays_news()
